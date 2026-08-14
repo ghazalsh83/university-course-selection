@@ -1,0 +1,29 @@
+[
+    {
+        "ID": "4041414",
+        "first_name": "Ghazal",
+        "last_name": "shakibaei",
+        "student_number": "4041414",
+        "major": "Computer Engineering",
+        "selected_courses": [
+            "DARS1",
+            "DARS2"
+        ]
+    },
+    {
+        "ID": "4041415",
+        "first_name": "marzie",
+        "last_name": "dalvand",
+        "student_number": "4041415",
+        "major": "Computer Engineering",
+        "selected_courses": []
+    },
+    {
+        "ID": "4041416",
+        "first_name": "marzie2",
+        "last_name": "dalvand2",
+        "student_number": "4041416",
+        "major": "Computer Engineering",
+        "selected_courses": []
+    }
+]

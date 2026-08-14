@@ -1,0 +1,24 @@
+[
+    {
+        "course_number": 1,
+        "title": "Data Structures",
+        "code": "DARS1",
+        "units": 3,
+        "capacity": 30,
+        "professor": "4041412",
+        "students": [
+            "4041414"
+        ]
+    },
+    {
+        "course_number": 2,
+        "title": "Computer",
+        "code": "DARS2",
+        "units": 3,
+        "capacity": 1,
+        "professor": null,
+        "students": [
+            "4041414"
+        ]
+    }
+]
