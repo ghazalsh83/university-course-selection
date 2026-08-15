@@ -12,9 +12,7 @@ def create_student(student_data: StudentCreate):
 
     for student in students:
         if student["student_number"] == student_data.student_number:
-            raise StudentAlreadyExistsException(
-                "Student already exists"
-            )
+            raise StudentAlreadyExistsException("Student already exists")
 
     student = Student(
         ID=str(len(students) + 1),
@@ -39,7 +37,8 @@ def get_all_students():
             first_name=student["first_name"],
             last_name=student["last_name"],
             student_number=student["student_number"],
-            major=student["major"]
+            major=student["major"],
+            selected_courses=student.get("selected_courses", [])
         )
         for student in students
     ]
@@ -55,7 +54,8 @@ def get_student_by_id(student_number):
                 first_name=student["first_name"],
                 last_name=student["last_name"],
                 student_number=student["student_number"],
-                major=student["major"]
+                major=student["major"],
+                selected_courses=student.get("selected_courses", [])
             )
 
     raise StudentNotFoundException("Student not found")
@@ -80,9 +80,7 @@ def update_student(student_number, student_data: StudentUpdate):
                 student["student_number"] == student_data.student_number
                 and student["student_number"] != student_number
             ):
-                raise StudentAlreadyExistsException(
-                    "Student already exists"
-                )
+                raise StudentAlreadyExistsException("Student already exists")
 
     if student_data.first_name is not None:
         target_student["first_name"] = student_data.first_name
@@ -103,8 +101,10 @@ def update_student(student_number, student_data: StudentUpdate):
         first_name=target_student["first_name"],
         last_name=target_student["last_name"],
         student_number=target_student["student_number"],
-        major=target_student["major"]
+        major=target_student["major"],
+        selected_courses=target_student.get("selected_courses", [])
     )
+
 
 def delete_student(student_number):
     students, professors, courses = load_all()

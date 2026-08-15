@@ -5,13 +5,15 @@ class Course:
         title,
         code,
         units,
-        capacity
+        capacity,
+        major=None
     ):
         self.course_number = course_number
         self.title = title
         self.code = code
         self.units = units
         self.capacity = capacity
+        self.major = major
         self.professor = None
         self.students = []
 
@@ -37,6 +39,7 @@ class Course:
             "code": self.code,
             "units": self.units,
             "capacity": self.capacity,
+            "major": self.major,
             "professor": (
                 self.professor.get_full_name()
                 if self.professor

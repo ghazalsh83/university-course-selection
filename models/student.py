@@ -8,20 +8,23 @@ class Student(Person):
         first_name,
         last_name,
         student_number,
-        major
+        major,
+        selected_courses=None
     ):
         super().__init__(ID, first_name, last_name)
 
         self.student_number = student_number
         self.major = major
-        self.selected_courses = []
+        self.selected_courses = (
+            selected_courses if selected_courses is not None else []
+        )
 
-    def select_course(self, course):
-        self.selected_courses.append(course)
+    def select_course(self, course_code):
+        self.selected_courses.append(course_code)
 
-    def drop_course(self, course):
-        if course in self.selected_courses:
-            self.selected_courses.remove(course)
+    def drop_course(self, course_code):
+        if course_code in self.selected_courses:
+            self.selected_courses.remove(course_code)
 
     def get_courses(self):
         return self.selected_courses
@@ -33,8 +36,5 @@ class Student(Person):
             "last_name": self.last_name,
             "student_number": self.student_number,
             "major": self.major,
-            "selected_courses": [
-                course.to_dict()
-                for course in self.selected_courses
-            ]
+            "selected_courses": self.selected_courses
         }

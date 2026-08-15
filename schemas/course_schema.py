@@ -10,31 +10,11 @@ class CourseCreate(BaseModel):
 
 
 class CourseUpdate(BaseModel):
-    major: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=80
-    )
-    title: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=100
-    )
-    code: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=20
-    )
-    unit: int | None = Field(
-        default=None,
-        ge=1,
-        le=5
-    )
-    capacity: int | None = Field(
-        default=None,
-        ge=1,
-        le=200
-    )
+    major: str | None = Field(default=None, min_length=2, max_length=80)
+    title: str | None = Field(default=None, min_length=2, max_length=100)
+    code: str | None = Field(default=None, min_length=2, max_length=20)
+    unit: int | None = Field(default=None, ge=1, le=5)
+    capacity: int | None = Field(default=None, ge=1, le=200)
 
 
 class CourseResponse(BaseModel):
@@ -43,5 +23,6 @@ class CourseResponse(BaseModel):
     code: str
     units: int
     capacity: int
+    major: str | None = None
     professor: str | None
     students: list[str]

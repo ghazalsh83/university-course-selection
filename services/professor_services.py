@@ -1,13 +1,12 @@
-from models.professor import Professor
-from schemas.professor_schema import ProfessorCreate, ProfessorUpdate
 from data.storage import load_all, save_all
+from models.professor import Professor
 from exceptions.custom_exceptions import (
     ProfessorNotFoundException,
     ProfessorAlreadyExistsException
 )
 
 
-def create_professor(professor_data: ProfessorCreate):
+def create_professor(professor_data):
     students, professors, courses = load_all()
 
     for professor in professors:
@@ -25,13 +24,14 @@ def create_professor(professor_data: ProfessorCreate):
     )
 
     professors.append(professor.to_dict())
+
     save_all(students, professors, courses)
 
     return professor
 
 
 def get_all_professors():
-    _, professors, courses = load_all()
+    students, professors, courses = load_all()
 
     result = []
 
@@ -47,17 +47,16 @@ def get_all_professors():
         for course_code in professor_data.get("courses", []):
             for course_data in courses:
                 if course_data["code"] == course_code:
-                    from models.course import Course
+                    from services.course_services import build_course
 
-                    course = Course(
-                        course_number=course_data["course_number"],
-                        title=course_data["title"],
-                        code=course_data["code"],
-                        units=course_data["units"],
-                        capacity=course_data["capacity"]
-                    )
+                    course = build_course(course_data, professors, students)
 
-                    professor.assign_course(course)
+                    if course.professor is None:
+                        course.professor = professor
+
+                    professor.courses.append(course)
+
+                    break
 
         result.append(professor)
 
@@ -65,46 +64,22 @@ def get_all_professors():
 
 
 def get_professor_by_id(personnel_code):
-    _, professors, courses = load_all()
+    professors = get_all_professors()
 
-    for professor_data in professors:
-        if professor_data["personnel_code"] == personnel_code:
-
-            professor = Professor(
-                ID=professor_data["ID"],
-                first_name=professor_data["first_name"],
-                last_name=professor_data["last_name"],
-                personnel_code=professor_data["personnel_code"],
-                department=professor_data["department"]
-            )
-
-            for course_code in professor_data.get("courses", []):
-                for course_data in courses:
-                    if course_data["code"] == course_code:
-                        from models.course import Course
-
-                        course = Course(
-                            course_number=course_data["course_number"],
-                            title=course_data["title"],
-                            code=course_data["code"],
-                            units=course_data["units"],
-                            capacity=course_data["capacity"]
-                        )
-
-                        professor.assign_course(course)
-
+    for professor in professors:
+        if str(professor.personnel_code) == str(personnel_code):
             return professor
 
     raise ProfessorNotFoundException("Professor not found")
 
 
-def update_professor(personnel_code, professor_data: ProfessorUpdate):
+def update_professor(personnel_code, professor_data):
     students, professors, courses = load_all()
 
     target_professor = None
 
     for professor in professors:
-        if professor["personnel_code"] == personnel_code:
+        if str(professor["personnel_code"]) == str(personnel_code):
             target_professor = professor
             break
 
@@ -135,20 +110,24 @@ def update_professor(personnel_code, professor_data: ProfessorUpdate):
 
     save_all(students, professors, courses)
 
-    return get_professor_by_id(
-        target_professor["personnel_code"]
+    new_personnel_code = (
+        professor_data.personnel_code
+        if professor_data.personnel_code is not None
+        else personnel_code
     )
+
+    return get_professor_by_id(new_personnel_code)
 
 
 def delete_professor(personnel_code):
     students, professors, courses = load_all()
 
     for i, professor in enumerate(professors):
-        if professor["personnel_code"] == personnel_code:
-            deleted_professor = professors.pop(i)
+        if str(professor["personnel_code"]) == str(personnel_code):
+            professors.pop(i)
 
             save_all(students, professors, courses)
 
-            return deleted_professor
+            return
 
     raise ProfessorNotFoundException("Professor not found")
