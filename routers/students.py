@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from schemas.student_schema import (
     StudentCreate,
@@ -39,6 +39,19 @@ def create_student_api(student_data: StudentCreate):
 def get_all_students_api():
     students = get_all_students()
     return [student.to_dict() for student in students]
+
+
+@router.get("/search")
+def search_students(
+    major: str = Query(..., min_length=2)
+):
+    students = get_all_students()
+
+    return [
+        student.to_dict()
+        for student in students
+        if major.lower() in student.major.lower()
+    ]
 
 
 @router.get("/{student_id}", response_model=StudentResponse)
