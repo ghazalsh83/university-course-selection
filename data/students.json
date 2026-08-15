@@ -16,7 +16,9 @@
         "last_name": "dalvand",
         "student_number": "4041415",
         "major": "Computer Engineering",
-        "selected_courses": []
+        "selected_courses": [
+            "DARS1"
+        ]
     },
     {
         "ID": "4041416",
