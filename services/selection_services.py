@@ -45,13 +45,8 @@ def select_course_for_student(student_number, course_code):
         raise CourseFullException("Course is full")
 
     # اضافه کردن درس برای دانشجو
-    course_data["students"].append(
-        student_number
-    )
-
-    student_data["selected_courses"].append(
-        course_code
-    )
+    course_data["students"].append(student_number)
+    student_data["selected_courses"].append(course_code)
 
     save_all(students, professors, courses)
 
@@ -89,15 +84,11 @@ def drop_course_for_student(student_number, course_code):
         )
 
     # حذف درس از لیست دانشجو
-    student_data["selected_courses"].remove(
-        course_code
-    )
+    student_data["selected_courses"].remove(course_code)
 
     # حذف دانشجو از لیست دانشجویان درس
     if student_number in course_data["students"]:
-        course_data["students"].remove(
-            student_number
-        )
+        course_data["students"].remove(student_number)
 
     save_all(students, professors, courses)
 
@@ -116,9 +107,7 @@ def get_student_courses(student_number):
             break
 
     if student_data is None:
-        raise StudentNotFoundException(
-            "Student not found"
-        )
+        raise StudentNotFoundException("Student not found")
 
     result = []
 
@@ -126,12 +115,14 @@ def get_student_courses(student_number):
     for course_code in student_data["selected_courses"]:
         for course_data in courses:
             if course_data["code"] == course_code:
-                result.append(
-                    build_course(
-                        course_data,
-                        professors
-                    )
+
+                course = build_course(
+                    course_data,
+                    professors
                 )
+
+                result.append(course.to_dict())
+
                 break
 
     return result
@@ -153,9 +144,7 @@ def assign_professor_to_course(
             break
 
     if professor_data is None:
-        raise ProfessorNotFoundException(
-            "Professor not found"
-        )
+        raise ProfessorNotFoundException("Professor not found")
 
     # پیدا کردن درس
     for course in courses:
@@ -164,9 +153,7 @@ def assign_professor_to_course(
             break
 
     if course_data is None:
-        raise CourseNotFoundException(
-            "Course not found"
-        )
+        raise CourseNotFoundException("Course not found")
 
     # تخصیص استاد به درس
     course_data["professor"] = personnel_code
@@ -176,14 +163,8 @@ def assign_professor_to_course(
         professor_data["courses"] = []
 
     if course_code not in professor_data["courses"]:
-        professor_data["courses"].append(
-            course_code
-        )
+        professor_data["courses"].append(course_code)
 
-    save_all(
-        students,
-        professors,
-        courses
-    )
+    save_all(students, professors, courses)
 
     return True
