@@ -118,7 +118,8 @@ def get_student_courses(student_number):
 
                 course = build_course(
                     course_data,
-                    professors
+                    professors,
+                    students
                 )
 
                 result.append(course.to_dict())
@@ -165,6 +166,10 @@ def assign_professor_to_course(
     if course_code not in professor_data["courses"]:
         professor_data["courses"].append(course_code)
 
-    save_all(students, professors, courses)
+    save_all(
+        students,
+        professors,
+        courses
+    )
 
     return True
