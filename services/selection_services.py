@@ -122,7 +122,7 @@ def get_student_courses(student_number):
                     students
                 )
 
-                result.append(course.to_dict())
+                result.append(course)
 
                 break
 

@@ -1,5 +1,5 @@
-from data.storage import load_all, save_all
 from models.professor import Professor
+from data.storage import load_all, save_all
 from exceptions.custom_exceptions import (
     ProfessorNotFoundException,
     ProfessorAlreadyExistsException
@@ -9,6 +9,7 @@ from exceptions.custom_exceptions import (
 def create_professor(professor_data):
     students, professors, courses = load_all()
 
+    # بررسی تکراری نبودن استاد
     for professor in professors:
         if professor["personnel_code"] == professor_data.personnel_code:
             raise ProfessorAlreadyExistsException(
@@ -16,7 +17,7 @@ def create_professor(professor_data):
             )
 
     professor = Professor(
-        ID=str(len(professors) + 1),
+        ID=professor_data.ID,
         first_name=professor_data.first_name,
         last_name=professor_data.last_name,
         personnel_code=professor_data.personnel_code,
@@ -25,109 +26,91 @@ def create_professor(professor_data):
 
     professors.append(professor.to_dict())
 
-    save_all(students, professors, courses)
+    save_all(
+        students,
+        professors,
+        courses
+    )
+
+    return professor
+
+
+def build_professor(professor_data, courses):
+    professor = Professor(
+        ID=professor_data["ID"],
+        first_name=professor_data["first_name"],
+        last_name=professor_data["last_name"],
+        personnel_code=professor_data["personnel_code"],
+        department=professor_data["department"]
+    )
+
+    # پیدا کردن درس‌های استاد
+    for course_code in professor_data.get("courses", []):
+        for course_data in courses:
+            if course_data["code"] == course_code:
+                professor.courses.append(
+                    course_data
+                )
+                break
 
     return professor
 
 
 def get_all_professors():
-    students, professors, courses = load_all()
+    _, professors, courses = load_all()
 
-    result = []
-
-    for professor_data in professors:
-        professor = Professor(
-            ID=professor_data["ID"],
-            first_name=professor_data["first_name"],
-            last_name=professor_data["last_name"],
-            personnel_code=professor_data["personnel_code"],
-            department=professor_data["department"]
+    return [
+        build_professor(
+            professor,
+            courses
         )
-
-        for course_code in professor_data.get("courses", []):
-            for course_data in courses:
-                if course_data["code"] == course_code:
-                    from services.course_services import build_course
-
-                    course = build_course(course_data, professors, students)
-
-                    if course.professor is None:
-                        course.professor = professor
-
-                    professor.courses.append(course)
-
-                    break
-
-        result.append(professor)
-
-    return result
+        for professor in professors
+    ]
 
 
 def get_professor_by_id(personnel_code):
-    professors = get_all_professors()
+    _, professors, courses = load_all()
 
-    for professor in professors:
-        if str(professor.personnel_code) == str(personnel_code):
-            return professor
+    for professor_data in professors:
+        if (
+            str(professor_data["personnel_code"])
+            == str(personnel_code)
+        ):
+            return build_professor(
+                professor_data,
+                courses
+            )
 
-    raise ProfessorNotFoundException("Professor not found")
-
-
-def update_professor(personnel_code, professor_data):
-    students, professors, courses = load_all()
-
-    target_professor = None
-
-    for professor in professors:
-        if str(professor["personnel_code"]) == str(personnel_code):
-            target_professor = professor
-            break
-
-    if target_professor is None:
-        raise ProfessorNotFoundException("Professor not found")
-
-    if professor_data.personnel_code is not None:
-        for professor in professors:
-            if (
-                professor["personnel_code"] == professor_data.personnel_code
-                and professor["personnel_code"] != personnel_code
-            ):
-                raise ProfessorAlreadyExistsException(
-                    "Professor already exists"
-                )
-
-    if professor_data.first_name is not None:
-        target_professor["first_name"] = professor_data.first_name
-
-    if professor_data.last_name is not None:
-        target_professor["last_name"] = professor_data.last_name
-
-    if professor_data.personnel_code is not None:
-        target_professor["personnel_code"] = professor_data.personnel_code
-
-    if professor_data.department is not None:
-        target_professor["department"] = professor_data.department
-
-    save_all(students, professors, courses)
-
-    new_personnel_code = (
-        professor_data.personnel_code
-        if professor_data.personnel_code is not None
-        else personnel_code
+    raise ProfessorNotFoundException(
+        "Professor not found"
     )
-
-    return get_professor_by_id(new_personnel_code)
 
 
 def delete_professor(personnel_code):
     students, professors, courses = load_all()
 
     for i, professor in enumerate(professors):
-        if str(professor["personnel_code"]) == str(personnel_code):
-            professors.pop(i)
 
-            save_all(students, professors, courses)
+        if (
+            str(professor["personnel_code"])
+            == str(personnel_code)
+        ):
 
-            return
+            deleted_professor = professors.pop(i)
 
-    raise ProfessorNotFoundException("Professor not found")
+            # حذف ارتباط استاد از درس‌ها
+            for course in courses:
+                if course.get("professor") == personnel_code:
+                    course["professor"] = None
+
+            save_all(
+                students,
+                professors,
+                courses
+            )
+
+            return deleted_professor
+
+    raise ProfessorNotFoundException(
+        "Professor not found"
+    )
